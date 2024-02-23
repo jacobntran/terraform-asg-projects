@@ -13,3 +13,7 @@ variable "availability_zone" {
 variable "subnet_name" {
     description = "Name of the subnet"
 }
+
+variable "enable_public_ips" {
+    description = "Decides if instances in the subnet get public ips"
+}
