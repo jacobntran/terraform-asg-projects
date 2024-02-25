@@ -30,17 +30,17 @@ data "aws_vpc" "selected" {
     }
 }
 
-data "aws_instance" "selected" {
-    filter {
-        name = "tag:Name"
-        values = ["Apache Web Server"]
-    }
+# data "aws_instance" "selected" {
+#     filter {
+#         name = "tag:Name"
+#         values = ["Apache Web Server"]
+#     }
 
-    filter {
-        name = "instance-state-code"
-        values = ["16"]
-    }
-}
+#     filter {
+#         name = "instance-state-code"
+#         values = ["16"]
+#     }
+# }
 
 module "application_load_balancer" {
     source = "../../modules/services/load-balancer/"
@@ -49,6 +49,7 @@ module "application_load_balancer" {
     subnets = [data.aws_subnet.public_subnet_az1.id, data.aws_subnet.public_subnet_az2.id, data.aws_subnet.public_subnet_az3.id]
     vpc_id = data.aws_vpc.selected.id
     security_groups = [aws_security_group.allow_http.id]
+    name = "alb"
 }
 
 resource "aws_security_group" "allow_http"{
@@ -96,11 +97,4 @@ resource "aws_lb_listener" "this" {
         type = "forward"
         target_group_arn = aws_lb_target_group.this.arn
     }
-}
-
-
-resource "aws_lb_target_group_attachment" "this" {
-    target_group_arn = aws_lb_target_group.this.arn
-    target_id = data.aws_instance.selected.id
-    port = 80
 }

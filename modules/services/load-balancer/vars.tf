@@ -17,3 +17,7 @@ variable "vpc_id" {
 variable "security_groups" {
     description = "Security groups to use with the LB"
 }
+
+variable "name" {
+    description = "Name of the LB"
+}
