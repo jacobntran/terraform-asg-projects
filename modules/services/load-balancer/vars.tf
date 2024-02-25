@@ -13,3 +13,7 @@ variable "subnets" {
 variable "vpc_id" {
     description = "ID of the vpc"
 }
+
+variable "security_groups" {
+    description = "Security groups to use with the LB"
+}
