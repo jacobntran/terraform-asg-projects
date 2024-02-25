@@ -134,10 +134,20 @@ resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 }
 
-# resource "aws_internet_gateway_attachment" "this" {
-#   internet_gateway_id = aws_internet_gateway.this.id
-#   vpc_id = aws_vpc.this.id
-# }
+resource "aws_eip" "nat_gateway" {
+  domain = "vpc"
+}
+
+resource "aws_nat_gateway" "this" {
+  allocation_id = aws_eip.nat_gateway.id
+  subnet_id = module.public_subnet_az1.subnet_id
+
+  tags = {
+    Name = "Public Subnet AZ1 NAT GW"
+  }
+
+  depends_on = [aws_internet_gateway.this]
+}
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
@@ -161,4 +171,28 @@ resource "aws_route_table_association" "public_az2" {
 resource "aws_route_table_association" "public_az3" {
   subnet_id = module.public_subnet_az3.subnet_id
   route_table_id = aws_route_table.public.id
+}
+
+resource "aws_route_table" "private_compute" {
+  vpc_id = aws_vpc.this.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.this.id
+  }
+}
+
+resource "aws_route_table_association" "private_compute_az1" {
+  subnet_id = module.private_compute_subnet_az1.subnet_id
+  route_table_id = aws_route_table.private_compute.id
+}
+
+resource "aws_route_table_association" "private_compute_az2" {
+  subnet_id = module.private_compute_subnet_az2.subnet_id
+  route_table_id = aws_route_table.private_compute.id
+}
+
+resource "aws_route_table_association" "private_compute_az3" {
+  subnet_id = module.private_compute_subnet_az3.subnet_id
+  route_table_id = aws_route_table.private_compute.id
 }
